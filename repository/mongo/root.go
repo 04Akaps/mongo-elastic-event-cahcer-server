@@ -13,8 +13,8 @@ type MongoDB struct {
 	client *mongo.Client
 	db     *mongo.Database
 
-	collectionOne collectionOne
-	collectionTwo collectionTwo
+	CollectionOne collectionOne
+	CollectionTwo collectionTwo
 
 	cancelFunc context.CancelFunc
 }
@@ -36,11 +36,11 @@ func NewMongoDB(cfg *config.Config) (*MongoDB, error) {
 
 	m.db = m.client.Database(cfg.MongoDB.DB)
 
-	m.collectionOne = collectionOne{
+	m.CollectionOne = collectionOne{
 		cancelFunc: m.cancelFunc,
 		collection: m.db.Collection(types.COLLECTION_ONE),
 	}
-	m.collectionTwo = collectionTwo{
+	m.CollectionTwo = collectionTwo{
 		cancelFunc: m.cancelFunc,
 		collection: m.db.Collection(types.COLLECTION_TWO),
 	}
@@ -51,6 +51,6 @@ func NewMongoDB(cfg *config.Config) (*MongoDB, error) {
 }
 
 func (m *MongoDB) collectionInit() {
-	m.collectionOne.init()
-	m.collectionTwo.init()
+	m.CollectionOne.init()
+	m.CollectionTwo.init()
 }

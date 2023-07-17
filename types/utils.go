@@ -6,8 +6,8 @@ import (
 )
 
 const (
-	COLLECTION_ONE = "collectionOne"
-	COLLECTION_TWO = "collectionTwo"
+	COLLECTION_ONE = "collection-one"
+	COLLECTION_TWO = "collection-two"
 )
 
 var collectionStructMap = map[string]interface{}{

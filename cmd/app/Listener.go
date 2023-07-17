@@ -26,6 +26,13 @@ func NewListener(cfg *config.Config) {
 	if listener.elastic, err = elastic.NewElastic(cfg); err != nil {
 		panic(err)
 	}
+	for key := range cfg.Collections {
+		if err = listener.elastic.CheckIndexExisted(key); err != nil {
+			panic(err)
+		}
+	}
+
+	go listener.mongo.CollectionOne.CatchInsertEvent(listener.elastic.Es)
 
 	listener.waitUntilBug()
 }

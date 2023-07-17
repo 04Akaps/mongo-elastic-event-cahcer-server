@@ -3,10 +3,11 @@ package mongo
 import (
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo/options"
+	"time"
 )
 
 var insertEventCacher = []bson.M{
-	bson.M{
+	{
 		"$match": bson.M{
 			"operationType": "insert",
 		},
@@ -14,7 +15,7 @@ var insertEventCacher = []bson.M{
 }
 
 var updateEventCacher = []bson.M{
-	bson.M{
+	{
 		"$match": bson.M{
 			"operationType": "update",
 		},
@@ -22,7 +23,7 @@ var updateEventCacher = []bson.M{
 }
 
 var deleteEventCacher = []bson.M{
-	bson.M{
+	{
 		"$match": bson.M{
 			"operationType": "delete",
 		},
@@ -30,3 +31,5 @@ var deleteEventCacher = []bson.M{
 }
 
 var latestStreamOption = options.ChangeStream().SetFullDocument(options.UpdateLookup)
+
+const SYNC_TIME_TTL = 3 * time.Second

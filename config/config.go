@@ -41,7 +41,7 @@ func NewConfig(file string) *Config {
 			panic(err)
 		} else {
 			for key := range c.Collections {
-				if err := types.VerifyStructMap(key); err != nil {
+				if err = types.VerifyStructMap(key); err != nil {
 					panic(err)
 				}
 			}

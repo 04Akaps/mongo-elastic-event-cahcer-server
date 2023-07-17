@@ -2,6 +2,8 @@ package mongo
 
 import (
 	"context"
+	"github.com/olivere/elastic"
+	"sync"
 
 	"go.mongodb.org/mongo-driver/mongo"
 )
@@ -12,6 +14,8 @@ type collectionTwo struct {
 	update     *mongo.ChangeStream
 	insert     *mongo.ChangeStream
 	delete     *mongo.ChangeStream
+
+	sync sync.Mutex
 }
 
 func (c *collectionTwo) init() {
@@ -29,4 +33,17 @@ func (c *collectionTwo) init() {
 	if c.delete, err = c.collection.Watch(ctx, deleteEventCacher, latestStreamOption); err != nil {
 		panic(err)
 	}
+
+}
+
+func (c *collectionTwo) CatchInsertEvent(elasticClient *elastic.Client) {
+	//bulk := elasticClient.Bulk()
+}
+
+func (c *collectionTwo) CatchUpdateEvent(elasticClient *elastic.Client) {
+	//bulk := elasticClient.Bulk()
+}
+
+func (c *collectionTwo) CatchDeleteEvent(elasticClient *elastic.Client) {
+	//bulk := elasticClient.Bulk()
 }
