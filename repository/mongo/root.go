@@ -14,7 +14,6 @@ type MongoDB struct {
 	db     *mongo.Database
 
 	CollectionOne collectionOne
-	CollectionTwo collectionTwo
 
 	cancelFunc context.CancelFunc
 }
@@ -40,10 +39,6 @@ func NewMongoDB(cfg *config.Config) (*MongoDB, error) {
 		cancelFunc: m.cancelFunc,
 		collection: m.db.Collection(types.COLLECTION_ONE),
 	}
-	m.CollectionTwo = collectionTwo{
-		cancelFunc: m.cancelFunc,
-		collection: m.db.Collection(types.COLLECTION_TWO),
-	}
 
 	m.collectionInit()
 
@@ -52,5 +47,4 @@ func NewMongoDB(cfg *config.Config) (*MongoDB, error) {
 
 func (m *MongoDB) collectionInit() {
 	m.CollectionOne.init()
-	m.CollectionTwo.init()
 }

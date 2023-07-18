@@ -8,13 +8,9 @@ docker.elastic.co/elasticsearch/elasticsearch:7.14.0
 ```
 
 ```
-
 docker run -d -p 5601:5601 --link elasticsearch-docker:elasticsearch --name kibana-docker docker.elastic.co/kibana/kibana:7.14.0
 ```
 
 ```
 curl -u <사용자이름>:<비밀번호> -X GET "http://localhost:9200/<인덱스이름>/_search"
 ```
-
-
-

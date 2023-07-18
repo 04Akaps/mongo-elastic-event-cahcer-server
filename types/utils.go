@@ -7,12 +7,10 @@ import (
 
 const (
 	COLLECTION_ONE = "collection-one"
-	COLLECTION_TWO = "collection-two"
 )
 
 var collectionStructMap = map[string]interface{}{
 	COLLECTION_ONE: &CollectionOne{},
-	COLLECTION_TWO: &CollectionTwo{},
 }
 
 func VerifyStructMap(name string) error {

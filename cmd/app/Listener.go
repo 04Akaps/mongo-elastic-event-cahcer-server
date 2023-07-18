@@ -34,6 +34,7 @@ func NewListener(cfg *config.Config) {
 
 	go listener.mongo.CollectionOne.CatchInsertEvent(listener.elastic.Es)
 	go listener.mongo.CollectionOne.CatchUpdateEvent(listener.elastic.Es)
+	go listener.mongo.CollectionOne.CatchDeleteEvent(listener.elastic.Es)
 
 	listener.waitUntilBug()
 }

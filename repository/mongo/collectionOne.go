@@ -3,6 +3,7 @@ package mongo
 import (
 	"context"
 	"fmt"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"log"
 	"mongo-event-cacher/types"
 	"sync"
@@ -72,7 +73,6 @@ func (c *collectionOne) CatchInsertEvent(elasticClient *elastic.Client) {
 		if err := c.insert.Decode(&changeEvent); err != nil {
 			return
 		}
-
 		req := elastic.NewBulkUpdateRequest()
 
 		req.UseEasyJSON(true)
@@ -129,7 +129,7 @@ func (c *collectionOne) CatchUpdateEvent(elasticClient *elastic.Client) {
 			log.Println("elastic Exists Error : ", err)
 		} else if exists {
 			// ID에 해당하는 값이 존재하는 경우
-			if _, err := elasticClient.Update().
+			if _, err = elasticClient.Update().
 				Index(c.collection.Name()).
 				Id(changeEvent.FullDocument.ID.String()).
 				Doc(&changeEvent.FullDocument).
@@ -140,23 +140,88 @@ func (c *collectionOne) CatchUpdateEvent(elasticClient *elastic.Client) {
 				log.Println(message)
 			}
 		} else {
-			req := elastic.NewBulkUpdateRequest()
-
-			req.UseEasyJSON(true)
-			req.Id(changeEvent.FullDocument.ID.String())
-			req.Index(c.collection.Name())
-			req.Doc(&changeEvent.FullDocument)
-			req.DocAsUpsert(true)
-
-			bulk.Add(req)
+			// TODO elasticSearch에 존재 하지 않는경우
+			// 에러 케이스 처리 해야함
+			// -> 이런 경우는 없기는 하지만 트러블 슈팅 가능함
+			//req := elastic.NewBulkUpdateRequest()
+			//
+			//req.UseEasyJSON(true)
+			//req.Id(changeEvent.FullDocument.ID.String())
+			//req.Index(c.collection.Name())
+			//req.Doc(&changeEvent.FullDocument)
+			//req.DocAsUpsert(true)
+			//
+			//bulk.Add(req)
 		}
 
 		s.Unlock()
 	}
 
-	defer c.insert.Close(ctx)
+	defer c.update.Close(ctx)
 }
 
 func (c *collectionOne) CatchDeleteEvent(elasticClient *elastic.Client) {
-	//bulk := elasticClient.Bulk()
+	ctx := context.TODO()
+	s := sync.Mutex{}
+
+	var deleteArray []*elastic.DeleteService
+	ticker := time.NewTicker(SYNC_TIME_TTL)
+
+	go func() {
+		for {
+			select {
+			case <-ticker.C:
+				s.Lock()
+
+				if len(deleteArray) != 0 {
+					for _, query := range deleteArray {
+						if _, err := query.Do(ctx); err != nil {
+							log.Println("Delete Failed!!!")
+						}
+					}
+
+					deleteArray = []*elastic.DeleteService{}
+				}
+
+				s.Unlock()
+			}
+		}
+	}()
+
+	for c.delete.Next(ctx) {
+		s.Lock()
+
+		var changeEvent struct {
+			DocumentKey struct {
+				ID primitive.ObjectID `bson:"_id"`
+			} `bson:"documentKey"`
+		}
+
+		if err := c.delete.Decode(&changeEvent); err != nil {
+			return
+		}
+
+		id := changeEvent.DocumentKey.ID.String()
+		deleteQuery := elasticClient.Delete().
+			Index(c.collection.Name()).
+			Id(id)
+
+		if exists, err := elasticClient.Exists().Index(c.collection.Name()).Id(id).Do(ctx); err != nil {
+			log.Println("ERROR : ", err)
+		} else if !exists {
+			deleteArray = append(deleteArray, deleteQuery)
+			return
+		} else {
+			if _, err = deleteQuery.Do(ctx); err != nil {
+				log.Println(err)
+				return
+			} else {
+				log.Println("Delete Success!!")
+			}
+		}
+
+		s.Unlock()
+	}
+
+	defer c.delete.Close(ctx)
 }
