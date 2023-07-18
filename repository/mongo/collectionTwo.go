@@ -2,8 +2,9 @@ package mongo
 
 import (
 	"context"
-	"github.com/olivere/elastic"
 	"sync"
+
+	"github.com/olivere/elastic/v7"
 
 	"go.mongodb.org/mongo-driver/mongo"
 )

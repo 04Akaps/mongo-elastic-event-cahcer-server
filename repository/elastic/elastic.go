@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"mongo-event-cacher/config"
 
-	"github.com/olivere/elastic"
+	"github.com/olivere/elastic/v7"
 )
 
 type Elastic struct {
